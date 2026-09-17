@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NombreMascota - Elige el nombre perfecto</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      color: #333;
+    }
+
+    header { text-align: center; color: #fff; margin-bottom: 2rem; }
+    header h1 { font-size: 2.2rem; margin-bottom: 0.4rem; }
+    header p { opacity: 0.9; }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 2rem;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 1.5rem;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .filtros select {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.6rem 0.8rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #f7fafc;
+      cursor: pointer;
+    }
+
+    .nombre-grande {
+      text-align: center;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #553c9a;
+      min-height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      transition: transform 0.15s ease;
+    }
+
+    .nombre-grande.pop { transform: scale(1.08); }
+
+    .info-nombre {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 1.5rem;
+      min-height: 1.5rem;
+    }
+
+    .botones { display: flex; gap: 0.75rem; }
+
+    button {
+      flex: 1;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    .btn-aleatorio { background: #6b46c1; color: #fff; }
+    .btn-aleatorio:hover { background: #553c9a; }
+
+    .btn-favorito { background: #fef3c7; color: #92400e; }
+    .btn-favorito:hover { background: #fde68a; }
+
+    .favoritos h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: #4a5568; }
+
+    .lista-favoritos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      min-height: 2.5rem;
+    }
+
+    .chip {
+      background: #ede9fe;
+      color: #5b21b6;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: aparecer 0.2s ease;
+    }
+
+    .chip span { cursor: pointer; opacity: 0.6; }
+    .chip span:hover { opacity: 1; }
+
+    .vacio { color: #a0aec0; font-size: 0.95rem; }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🐾 NombreMascota</h1>
+    <p>Encuentra el nombre perfecto para tu compañero</p>
+  </header>
+
+  <div class="card">
+    <div class="filtros">
+      <select id="tipo">
+        <option value="todos">🐶🐱 Todas</option>
+        <option value="perro">🐶 Perro</option>
+        <option value="gato">🐱 Gato</option>
+        <option value="ave">🦜 Ave</option>
+        <option value="roedor">🐹 Roedor</option>
+      </select>
+      <select id="genero">
+        <option value="todos">Cualquier género</option>
+        <option value="macho">Macho</option>
+        <option value="hembra">Hembra</option>
+      </select>
+    </div>
+
+    <div class="nombre-grande" id="nombre">¿?</div>
+    <div class="info-nombre" id="info">Pulsa el botón para generar un nombre</div>
+
+    <div class="botones">
+      <button class="btn-aleatorio" id="btnGenerar">🎲 Generar nombre</button>
+      <button class="btn-favorito" id="btnFavorito">⭐ Guardar</button>
+    </div>
+  </div>
+
+  <div class="card favoritos">
+    <h2>⭐ Tus favoritos</h2>
+    <div class="lista-favoritos" id="favoritos">
+      <span class="vacio">Aún no guardaste ningún nombre</span>
+    </div>
+  </div>
+
+  <script>
+    const nombres = {
+      perro: {
+        macho: ['Pluto', 'Rocky', 'Thor', 'Max', 'Bruno', 'Simba', 'Toby', 'Rex', 'Duke', 'Zeus', 'Apolo', 'Chispa', 'Coco', 'Bongo', 'Nilo', 'Otto'],
+        hembra: ['Luna', 'Nala', 'Kira', 'Daisy', 'Lola', 'Maya', 'Bella', 'Stella', 'Frida', 'Canela', 'Nina', 'Pepa', 'Roma', 'Zoe', 'India']
+      },
+      gato: {
+        macho: ['Michi', 'Oliver', 'Felix', 'Garfield', 'Salem', 'Bigotes', 'Milo', 'Leo', 'Tom', 'Neko', 'Pelusa', 'Tigre', 'Gus', 'Bastian', 'Sombra'],
+        hembra: ['Misha', 'Lily', 'Cleo', 'Mimi', 'Nube', 'Lunita', 'Atenea', 'Sasha', 'Mora', 'Perlita', 'Chloe', 'Isis', 'Nieve', 'Kiwi', 'Duna']
+      },
+      ave: {
+        macho: ['Piolín', 'Río', 'Paco', 'Kiwi', 'Sol', 'Plumas', 'Zazu', 'Cielo', 'Pepito', 'Blu'],
+        hembra: ['Perla', 'Lola', 'Coral', 'Estrella', 'Margarita', 'Azucena', 'Nina', 'Rosa', 'Celeste', 'Jade']
+      },
+      roedor: {
+        macho: ['Coco', 'Gusanito', 'Nibbles', 'Stuart', 'Remy', 'Quesito', 'Bolt', 'Pipo', 'Tostada'],
+        hembra: ['Canela', 'Almendra', 'Nuez', 'Muffin', 'Galleta', 'Pompona', 'Chispita', 'Avellana', 'Copito', 'Trufa']
+      }
+    };
+
+    let nombreActual = null;
+    let favoritos = JSON.parse(localStorage.getItem('favoritosMascota') || '[]');
+
+    const elNombre = document.getElementById('nombre');
+    const elInfo = document.getElementById('info');
+    const elTipo = document.getElementById('tipo');
+    const elGenero = document.getElementById('genero');
+
+    function generarNombre() {
+      const tipos = elTipo.value === 'todos' ? Object.keys(nombres) : [elTipo.value];
+      const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+      const generos = elGenero.value === 'todos' ? ['macho', 'hembra'] : [elGenero.value];
+      const genero = generos[Math.floor(Math.random() * generos.length)];
+      const lista = nombres[tipo][genero];
+      const nombre = lista[Math.floor(Math.random() * lista.length)];
+
+      nombreActual = nombre;
+      elNombre.textContent = nombre;
+      elNombre.classList.remove('pop');
+      void elNombre.offsetWidth;
+      elNombre.classList.add('pop');
+
+      const emojis = { perro: '🐶', gato: '🐱', ave: '🦜', roedor: '🐹' };
+      elInfo.textContent = `${emojis[tipo]} ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} · ${genero}`;
+    }
+
+    function guardarFavorito() {
+      if (!nombreActual) { generarNombre(); return; }
+      if (favoritos.includes(nombreActual)) {
+        elInfo.textContent = `"${nombreActual}" ya está en tus favoritos`;
+        return;
+      }
+      favoritos.push(nombreActual);
+      localStorage.setItem('favoritosMascota', JSON.stringify(favoritos));
+      renderFavoritos();
+    }
+
+    function quitarFavorito(nombre) {
+      favoritos = favoritos.filter(n => n !== nombre);
+      localStorage.setItem('favoritosMascota', JSON.stringify(favoritos));
+      renderFavoritos();
+    }
+
+    function renderFavoritos() {
+      const cont = document.getElementById('favoritos');
+      if (favoritos.length === 0) {
+        cont.innerHTML = '<span class="vacio">Aún no guardaste ningún nombre</span>';
+        return;
+      }
+      cont.innerHTML = '';
+      favoritos.forEach(n => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.textContent = n;
+        const x = document.createElement('span');
+        x.textContent = '✕';
+        x.title = 'Quitar';
+        x.onclick = () => quitarFavorito(n);
+        chip.appendChild(x);
+        cont.appendChild(chip);
+      });
+    }
+
+    document.getElementById('btnGenerar').addEventListener('click', generarNombre);
+    document.getElementById('btnFavorito').addEventListener('click', guardarFavorito);
+
+    renderFavoritos();
+  </script>
+</body>
+</html>
